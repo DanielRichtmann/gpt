@@ -26,7 +26,8 @@ def evals(matrix, evec, check_eps2 = None, skip = 1):
         v=evec[i]
         matrix(v,tmp)
         # M |v> = l |v> -> <v|M|v> / <v|v>
-        l=g.innerProduct(v,tmp).real / g.norm2(v)
+        ip,v2 = g.innerProductNorm2(v,tmp)
+        l = ip.real/v2
         ev.append(l)
         if not check_eps2 is None:
             eps2=g.norm2(tmp - l*v)

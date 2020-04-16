@@ -34,8 +34,9 @@ class cg:
         p,mmp,r=g.copy(src),g.copy(src),g.copy(src)
         guess=g.norm2(psi)
         mat(psi,mmp) # in, out
-        d=g.innerProduct(psi,mmp).real
-        b=g.norm2(mmp)
+        ip,mmp2=g.innerProductNorm2(psi,mmp)
+        d=ip.real
+        b=mmp2
         r @= src - mmp
         p @= r
         a = g.norm2(p)
