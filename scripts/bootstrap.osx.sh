@@ -70,5 +70,5 @@ exit
 #
 # cgpt
 #
-cd ${root}/cgpt
+cd ${root}/lib/cgpt
 ./make # still may need numpy headers
