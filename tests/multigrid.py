@@ -14,6 +14,7 @@ import os.path
 # load configuration
 homedir = os.path.expanduser("~")
 U = g.load(homedir + "/configs/openqcd/test_16x8_pbcn6")
+# U = g.load(homedir + "/configs/nersc/test_16x16_pbcn0")
 # U = g.load("/hpcgpfs01/work/clehner/configs/32IDfine/ckpoint_lat.200") # TODO: add parallel RNG so we can do tests from random gauge configs
 
 # do everything in single-precision

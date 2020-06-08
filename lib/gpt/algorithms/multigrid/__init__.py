@@ -18,4 +18,7 @@
 #    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 #
 from gpt.algorithms.multigrid.basis import basis
+# from gpt.algorithms.multigrid.cycle import cycle
 from gpt.algorithms.multigrid.intergrid import intergrid
+# from gpt.algorithms.multigrid.level import level
+# from gpt.algorithms.multigrid.precon import precon

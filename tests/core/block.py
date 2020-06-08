@@ -27,11 +27,17 @@ rng.cnormal(lcoarse)
 
 # temporary fine and coarse vectors
 tmpf=g.lattice(basis[0])
+tmpf[:] = 0
 lcoarse2=g.lattice(lcoarse)
+g.message("lcoarse = %g, tmpf = %g, lcoarse2 = %g" % (g.norm2(lcoarse), g.norm2(tmpf), g.norm2(lcoarse2)))
+
+g.meminfo()
 
 # coarse-to-fine-to-coarse
 g.block.promote(lcoarse,tmpf,basis)
+g.message("lcoarse = %g, tmpf = %g, lcoarse2 = %g" % (g.norm2(lcoarse), g.norm2(tmpf), g.norm2(lcoarse2)))
 g.block.project(lcoarse2,tmpf,basis)
+g.message("lcoarse = %g, tmpf = %g, lcoarse2 = %g" % (g.norm2(lcoarse), g.norm2(tmpf), g.norm2(lcoarse2)))
 
 # report error
 err2=g.norm2(lcoarse-lcoarse2) / g.norm2(lcoarse)
