@@ -26,6 +26,7 @@
 #include "operators/wilson_clover.h"
 #include "operators/zmobius.h"
 #include "operators/mobius.h"
+#include "operators/coarse.h"
 #include "operators/create.h"
     
 EXPORT(create_fermion_operator,{
@@ -77,4 +78,43 @@ EXPORT(apply_fermion_operator,{
     
     return PyFloat_FromDouble( ((cgpt_fermion_operator_base*)p)->unary((int)op,src,dst) );
     
+  });
+
+EXPORT(create_coarse_operator,{
+
+    PyObject* _prec,* _args;
+    if (!PyArg_ParseTuple(args, "OO", &_prec, &_args)) {
+      return NULL;
+    }
+
+    std::string prec;
+    cgpt_convert(_prec,prec);
+
+    // NOTE: Can't do the nbasis dispatching here, since one cannot use #include inside a macro -> nbasis can move into args
+
+    void* pop = 0;
+    if (prec == "single") {
+      pop = cgpt_create_coarse_operator<vComplexF>(_args);
+    } else if (prec == "double") {
+      pop = cgpt_create_coarse_operator<vComplexD>(_args);
+    } else {
+      ERR("Unknown precision");
+    }
+
+    ASSERT(pop);
+
+    return PyLong_FromVoidPtr(pop);
+  });
+
+EXPORT(delete_coarse_operator,{
+
+    return cgpt_delete_fermion_operator(self, args); // I looked up the macro, is this future-safe if the macro changes?
+
+  });
+
+EXPORT(apply_coarse_operator,{
+
+    return PyLong_FromLong(0);
+    // return cgpt_apply_fermion_operator(self, args);
+
   });
