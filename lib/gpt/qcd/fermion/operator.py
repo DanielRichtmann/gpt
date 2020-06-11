@@ -64,18 +64,18 @@ class operator:
     
 class coarse_operator:
     def __init__(self, cgrid, params): # cgrid only for now, should actually receive coarse link fields like U above
-        # NOTE only for first testing
-        nbasis = 20
-        prec = 'single'
 
         self.params = {
             "grid_c" : cgrid.obj,
-            "hermitian" : 1,
-            "level": 0,
-            "nbasis": nbasis
         }
 
-        self.obj = cgpt.create_coarse_operator(prec,self.params)
+        for k in params:
+            assert(not k in [ "grid_c" ])
+            self.params[k] = params[k]
+
+        self.obj = cgpt.create_fermion_operator("coarse",cgrid.precision,self.params)
+
+        gpt.qcd.fermion.register(self)
 
         # # TODO needs to have an array of objects (apply all of them one after the other)
         # self.obj = []
@@ -85,12 +85,14 @@ class coarse_operator:
         # some form of registration
 
     def __del__(self):
-        cgpt.delete_coarse_operator(self.obj)
+        cgpt.delete_fermion_operator(self.obj)
         # # TODO needs to have an array of objects (apply all of them one after the other)
         # for elem in self.obj:
-        #     cgpt.delete_coarse_operator(elem)
+        #     cgpt.delete_fermion_operator(elem)
 
     def unary(self, opcode, i, o):
         assert(len(i.v_obj) == len(o.v_obj))
-        for j in range(len(i.v_obj)):
-            cgpt.apply_fermion_operator(self.obj[j],opcode,i.v_obj[j],o.v_obj[j])
+        cgpt.apply_fermion_operator(self.obj,opcode,i.v_obj[0],o.v_obj[0])
+        # for j in range(len(i.v_obj)):
+        #     cgpt.apply_fermion_operator(self.obj[j],opcode,i.v_obj[j],o.v_obj[j])
+

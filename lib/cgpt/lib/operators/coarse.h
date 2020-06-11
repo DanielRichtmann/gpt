@@ -20,52 +20,58 @@
 #define prec_double 2
 #define prec_single 1
 
-template<int prec, int level>
-struct CoarseComplexLvl {
-  typedef iScalar<typename CoarseComplexLvl<prec, level-1>::type> type;
+// this is elegant since we can just add more precisions
+template<typename vCoeff_t, int prec = getPrecision<vCoeff_t>::value>
+struct FinestLevelFineVec {};
+template<typename vCoeff_t>
+struct FinestLevelFineVec<vCoeff_t, prec_double> {
+  typedef vSpinColourVectorD type;
 };
-template<> struct CoarseComplexLvl<prec_double, 0> { typedef vTComplexD type; };
-template<> struct CoarseComplexLvl<prec_single, 0> { typedef vTComplexF type; };
+template<typename vCoeff_t>
+struct FinestLevelFineVec<vCoeff_t, prec_single> {
+  typedef vSpinColourVectorF type;
+};
 
-template<int nbasis, int prec, int level>
-struct FineVectorLvl {
-  typedef iVector<typename CoarseComplexLvl<prec, level-1>::type, nbasis> type;
+template<typename vCoeff_t, int nbasis>
+struct OtherLevelsFineVec {
+  // typedef iVector<vCoeff_t, nbasis> type;
+  typedef iVector<iSinglet<vCoeff_t>, nbasis> type;
 };
-template<int nbasis> struct FineVectorLvl<nbasis, prec_double, 0> { typedef vSpinColourVectorD type; };
-template<int nbasis> struct FineVectorLvl<nbasis, prec_single, 0> { typedef vSpinColourVectorF type; };
+
+// Rest ///////////////////////////////////////////////////////////////////////
 
 template<typename vCoeff_t>
 cgpt_fermion_operator_base* cgpt_create_coarsenedmatrix(PyObject* args) {
 
-  constexpr int prec = getPrecision<vCoeff_t>::value; // 2 = double, 1 = single
+  typedef iSinglet<vCoeff_t> CoarseComplex;
+  // typedef vCoeff_t CoarseComplex;
+  // typedef iScalar<vCoeff_t> CoarseComplex;
 
   auto grid_c = get_pointer<GridCartesian>(args,"grid_c"); // should actually take an 'F_', and an 'U_' grid
   int hermitian = get_int(args,"hermitian");
   int level = get_int(args,"level"); // 0 = fine, increases with coarser levels
   int nbasis = get_int(args,"nbasis");
+  // int nbasis_f = get_int(args,"nbasis_f");
+  // int nbasis_c = get_int(args,"nbasis_c");
 
   // // Tests for the type classes ///////////////////////////////////////////////
-  // char* f0 = typename FineVectorLvl<nbasis, prec, 0>::type{}; char* c0 = typename CoarseComplexLvl<prec, 0>::type{};
-  // char* f1 = typename FineVectorLvl<nbasis, prec, 1>::type{}; char* c1 = typename CoarseComplexLvl<prec, 1>::type{};
-  // char* f2 = typename FineVectorLvl<nbasis, prec, 2>::type{}; char* c2 = typename CoarseComplexLvl<prec, 2>::type{};
-
-#define CASE_FOR_LEVEL(level, nbasis_) \
-  case level: \
-    typedef typename FineVectorLvl<nbasis_, prec, level>::type FVectorLvl##level; \
-    typedef typename CoarseComplexLvl<prec, level>::type       CComplexLvl##level; \
-    return new cgpt_fermion_operator<CoarsenedMatrix<FVectorLvl##level, CComplexLvl##level, nbasis_>>( \
-      new CoarsenedMatrix<FVectorLvl##level, CComplexLvl##level, nbasis_>(*grid_c, hermitian)); \
-    break;
+  // const int nbasis = 40;
+  // char* f0 = typename FinestLevelFineVec<vCoeff_t>::type{};              char* c0 = CoarseComplex{};
+  // char* f1 = typename OtherLevelsFineVec<CoarseComplex, nbasis>::type{}; char* c1 = CoarseComplex{};
+  // char* f2 = typename OtherLevelsFineVec<CoarseComplex, nbasis>::type{}; char* c2 = CoarseComplex{};
 
 #define BASIS_SIZE(n) \
   if(n == nbasis) { \
-    switch(level) { \
-      CASE_FOR_LEVEL(0, n); \
-      CASE_FOR_LEVEL(1, n); \
-      CASE_FOR_LEVEL(2, n); \
-      default: ERR("Unknown level %d", level); break; \
-    } \
-  } else
+    if(level == 0) { \
+      return new cgpt_fermion_operator< \
+        CoarsenedMatrix<typename FinestLevelFineVec<vCoeff_t>::type, CoarseComplex, n>>( \
+          new CoarsenedMatrix<typename FinestLevelFineVec<vCoeff_t>::type, CoarseComplex, n>(*grid_c, hermitian)); \
+    } else {                                                           \
+        return new cgpt_fermion_operator< \
+          CoarsenedMatrix<typename OtherLevelsFineVec<vCoeff_t, n>::type, CoarseComplex, n>>( \
+            new CoarsenedMatrix<typename OtherLevelsFineVec<vCoeff_t, n>::type, CoarseComplex, n>(*grid_c, hermitian)); \
+      } \
+    } else
 #include "../basis_size.h"
 #undef BASIS_SIZE
   { ERR("Unknown basis size %d", (int)nbasis); }

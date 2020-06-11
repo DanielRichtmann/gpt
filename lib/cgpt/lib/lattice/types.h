@@ -18,7 +18,7 @@
 */
 void lattice_init();
 
-#define BASIS_SIZE(n) template<typename vtype> using iComplexV ## n = iVector<vtype,n>;
+#define BASIS_SIZE(n) template<typename vobj> using iComplexV ## n = iVector<iSinglet<vobj>, n>;
 #include "../basis_size.h"
 #undef BASIS_SIZE
 
@@ -31,5 +31,5 @@ template<typename vobj> const std::string get_otype(const iColourMatrix<vobj>& l
 template<typename vobj> const std::string get_otype(const iColourVector<vobj>& l) { return "ot_vcolor"; };
 template<typename vobj> const std::string get_otype(const iSpinColourMatrix<vobj>& l) { return "ot_mspincolor"; };
 template<typename vobj> const std::string get_otype(const iSpinColourVector<vobj>& l) { return "ot_vspincolor"; };
-template<typename vobj,int nbasis> const std::string get_otype(const iVector<vobj,nbasis>& l) { return std::string("ot_vcomplex") + std::to_string(nbasis); };
+template<typename vobj,int nbasis> const std::string get_otype(const iVector<iSinglet<vobj>,nbasis>& l) { return std::string("ot_vcomplex") + std::to_string(nbasis); };
 template<typename T> const std::string get_otype(const Lattice<T>& l) { typedef typename Lattice<T>::vector_object vobj; vobj t; return get_otype(t); }

@@ -114,7 +114,15 @@ EXPORT(delete_coarse_operator,{
 
 EXPORT(apply_coarse_operator,{
 
-    return PyLong_FromLong(0);
-    // return cgpt_apply_fermion_operator(self, args);
+    void* p, *_src, *_dst;
+    long op;
+    if (!PyArg_ParseTuple(args, "llll", &p,&op,&_src,&_dst)) {
+      return NULL;
+    }
+
+    cgpt_Lattice_base* src = (cgpt_Lattice_base*)_src;
+    cgpt_Lattice_base* dst = (cgpt_Lattice_base*)_dst;
+
+    return PyFloat_FromDouble( ((cgpt_fermion_operator_base*)p)->unary((int)op,src,dst) );
 
   });
