@@ -31,8 +31,6 @@ tmpf[:] = 0
 lcoarse2=g.lattice(lcoarse)
 g.message("lcoarse = %g, tmpf = %g, lcoarse2 = %g" % (g.norm2(lcoarse), g.norm2(tmpf), g.norm2(lcoarse2)))
 
-g.meminfo()
-
 # coarse-to-fine-to-coarse
 g.block.promote(lcoarse,tmpf,basis)
 g.message("lcoarse = %g, tmpf = %g, lcoarse2 = %g" % (g.norm2(lcoarse), g.norm2(tmpf), g.norm2(lcoarse2)))
