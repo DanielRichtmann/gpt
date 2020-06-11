@@ -83,6 +83,14 @@ cgpt_Lattice_base* cgpt_lattice_matmul(cgpt_Lattice_base* dst, bool ac, int unar
 #include "../basis_size.h"
 #undef BASIS_SIZE
 
+#define BASIS_SIZE(n)							\
+  template<typename vtype>						\
+  cgpt_Lattice_base* cgpt_lattice_matmul(cgpt_Lattice_base* dst, bool ac, int unary_a, Lattice< iComplexM ## n<vtype> >& la, PyArrayObject* b, std::string& bot, int unary_b, int unary_expr, bool rev) { \
+    ERR("Not implemented");						\
+  }
+#include "../basis_size.h"
+#undef BASIS_SIZE
+
 
 #undef typeClose
 #undef typeOpen

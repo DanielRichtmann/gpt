@@ -167,6 +167,50 @@ def vcomplex(grid, n):
     return gpt_object(grid, ot_vcomplex(n))
 
 ###
+# Link matrices for coarse grid
+class ot_mcomplex10(ot_base):
+    nfloats=2*10*10
+    shape=(10,10)
+    v_otype=[ "ot_mcomplex10" ]
+
+class ot_mcomplex20(ot_base):
+    nfloats=2*20*20
+    shape=(20,20)
+    v_otype=[ "ot_mcomplex20" ]
+
+class ot_mcomplex40(ot_base):
+    nfloats=2*40*40
+    shape=(40,80)
+    v_otype=[ "ot_mcomplex40" ]
+
+class ot_mcomplex80(ot_base):
+    nfloats=2*80*80
+    shape=(80,80)
+    v_otype=[ "ot_mcomplex80" ]
+
+class ot_mcomplex:
+    fundamental={
+        10 : ot_mcomplex10,
+        20 : ot_mcomplex20,
+        40 : ot_mcomplex40,
+        80 : ot_mcomplex80,
+    }
+    def __init__(self, n):
+        self.__name__="ot_mcomplex(%d)" % n
+        self.nfloats=2*n*n
+        self.shape=(n,n)
+        self.transposed=None
+        self.spintrace=None
+        self.colortrace=None
+        decomposition=decompose(n, ot_mcomplex.fundamental.keys())
+        self.v_n0,self.v_n1 = get_range(decomposition)
+        self.v_idx=range(len(self.v_n0))
+        self.v_otype = [ ot_mcomplex.fundamental[x] for x in decomposition ]
+
+def mcomplex(grid, n):
+    return gpt_object(grid, ot_mcomplex(n))
+
+###
 # String conversion for safe file input
 def str_to_otype(s):
     base_types={ 
