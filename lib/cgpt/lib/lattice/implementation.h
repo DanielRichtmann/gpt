@@ -23,6 +23,7 @@ public:
 
   typedef typename Lattice<T>::vector_object vobj;
   typedef typename vobj::scalar_object sobj;
+  typedef typename vobj::tensor_reduced tensor_reduced;
   typedef typename Lattice<T>::vector_type vCoeff_t;
   typedef typename Lattice<T>::scalar_type Coeff_t;
 
@@ -196,6 +197,10 @@ public:
 
   virtual void block_orthonormalize(cgpt_Lattice_base* coarse, std::vector<cgpt_Lattice_base*>& basis) {
     cgpt_block_orthonormalize(coarse,l,basis);
+  }
+
+  virtual void block_maskedInnerProduct(cgpt_Lattice_base* coarse, cgpt_Lattice_base* fineMask, cgpt_Lattice_base* fineOther) {
+    cgpt_block_masked_inner_product(coarse,compatible<tensor_reduced>(fineMask)->l,l,compatible<T>(fineOther)->l);
   }
 
   virtual GridBase* get_grid() {
