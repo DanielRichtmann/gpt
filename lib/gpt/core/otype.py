@@ -270,7 +270,12 @@ class ot_msinglet:
         # if n == m:
         # Need to expand support for 2d v_idx
         # Also needs work in expr.eval
-        assert 0
+        # assert 0
+        # use version from vector for now
+        decomposition=decompose(n, ot_msinglet.fundamental.keys())
+        self.v_n0,self.v_n1 = get_range(decomposition)
+        self.v_idx=range(len(self.v_n0))
+        self.v_otype = [ ot_msinglet.fundamental[x] for x in decomposition ]
 
 
 def mcomplex(grid, n):
