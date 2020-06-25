@@ -78,3 +78,12 @@ def exp_ixp(p):
     return gpt.matrix_operator(
         mat=mat, adj_mat=inv_mat, inv_mat=inv_mat, adj_inv_mat=mat
     )
+
+
+def make_mask(field, mask):
+    assert type(mask == numpy.ndarray)
+    assert field.otype == gpt.ot_singlet
+
+    x = gpt.coordinates(field)
+    dtype = numpy.complex128 if field.grid.precision == gpt.double else numpy.complex64
+    field[x] = mask.astype(dtype).reshape((len(mask), 1))
