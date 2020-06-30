@@ -18,6 +18,14 @@ vc[0, 0, 0, 0, 29] = 2
 eps2 = g.norm2(vc[0, 0, 0, 0] - g.vcomplex([1] + [1.5] * 28 + [2], 30))
 assert eps2 < 1e-13
 
+# demonstrate multiplication with scalar (I need this to work for MG)
+vc1, vc2 = g.vcomplex(grid, 20), g.vcomplex(grid, 20)
+c = g.complex(grid)
+vc1[:] = 1
+c[:] = 0
+vc2 @= c * vc1
+assert g.norm2(vc2) == 0.0
+
 # assign entire lattice
 cm = g.mcolor(grid)
 cv = g.vcolor(grid)
