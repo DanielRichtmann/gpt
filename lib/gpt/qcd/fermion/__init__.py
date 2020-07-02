@@ -52,3 +52,9 @@ def zmobius(U, params):
 def mobius(U, params):
     params = copy.deepcopy(params)  # save current parameters
     return operator("mobius", U, params, params["Ls"], otype=gpt.ot_vspin4color3)
+
+
+@gpt.params_convention()
+def coarse(A, params):
+    params = copy.deepcopy(params)  # save current parameters
+    return coarse_operator(A, params, None, otype=gpt.ot_vsinglet)

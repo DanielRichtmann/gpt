@@ -220,6 +220,12 @@ class ot_vsinglet:
         self.v_idx = range(len(self.v_n0))
         self.v_otype = [ot_vsinglet.fundamental[x] for x in decomposition]
 
+    def distribute(mat, dst, src, zero_lhs):
+        # TODO does this need revisiting?
+        if zero_lhs:
+            dst[:] = 0
+        mat(dst, src)
+
 
 def vcomplex(grid, n):
     return gpt_object(grid, ot_vsinglet(n))
