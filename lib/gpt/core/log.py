@@ -27,7 +27,7 @@ def message(*a):
     if gpt.rank() == 0:
         lines = s.split("\n")
         if len(lines) > 0:
-            print("GPT : %14.6f s :" % gpt.time(), lines[0])
+            print("GPT  : %18.6f s :" % gpt.time(), lines[0])
             for line in lines[1:]:
                 print("                       :", line)
         sys.stdout.flush()
