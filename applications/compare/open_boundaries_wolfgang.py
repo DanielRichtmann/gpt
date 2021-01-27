@@ -34,6 +34,7 @@ g.create.point(src, params["src_coor"])
 # abbreviations
 i = g.algorithms.inverter
 p = g.qcd.fermion.preconditioner
+mg = i.multi_grid
 
 for action in ["wilson", "wilson_clover"]:
     # fermion operator
@@ -53,6 +54,74 @@ for action in ["wilson", "wilson_clover"]:
                     i.preconditioned(
                         p.eo2(), i.bicgstab({"eps": 1e-3, "maxiter": 1000})
                     ),
+                    g.single,
+                    g.double,
+                ),
+            )
+        )
+    elif "--use-multigrid" in sys.argv:
+        w_s = w.converted(g.single)
+        mg_setup = mg.setup(
+            w_s,
+            # lists control levels separately, scalars are broadcasted
+            {
+                "block_size": [  # mapping between fine and coarser lattices, control num levels
+                ],
+                "n_block_ortho": 2,  # number of Gram Schmidt passes for block ortho, 1 - 2 is fine
+                "check_block_ortho": True,  # perform orthogonality check
+                "n_basis": [40],  # number of null vectors per level * 2
+                "make_hermitian": False,  # not relevant for wilson
+                "save_links": True,  # set to True, speeds up setup by saving coarsening directions
+                "vector_type": "null",  # leave to null for now ("null" or "test" vectors)
+                "n_pre_ortho": 0,  # can be 1, but doesn't have to
+                "n_post_ortho": 1,  # should be 1
+                "solver": i.preconditioned(
+                    p.eo2_ne(parity=g.odd),
+                    i.cg({"eps": 1e-5, "maxiter": 1000, "checkres": False}),
+                ),  # solver to use for finding null vectors, tolerance ~ 1e-5
+                "distribution": rng.cnormal,  # distribution to use for initial null vectors
+            },
+        )
+        mg_prec = mg.inverter(
+            mg_setup,
+            # again, lists control levels separately
+            {
+                # solver to use on the coarsest level
+                "coarsest_solver": i.preconditioned(
+                    p.eo2_ne(parity=g.odd),
+                    i.cg(
+                        {
+                            "eps": 5e-2,  # 0.25 - 0.05 is fine
+                            "maxiter": 100,  # 8 - 16
+                            "restartlen": 20,  # >= maxiter
+                            "checkres": False,  # False is ok here
+                        }
+                    ),
+                ),
+                # solver to smooth on the levels
+                "smooth_solver": i.preconditioned(
+                    p.eo2_ne(parity=g.odd),
+                    i.cg(
+                        {
+                            "eps": 1e-14,
+                            "maxiter": 16,  # 8 - 16
+                            "restartlen": 16,  # => maxiter
+                            "checkres": False,  # False is ok here
+                        }
+                    ),
+                ),
+                # solver used in k-cycle
+                "wrapper_solver": None,  # performs v-cycle
+                # "wrapper_solver": inv.fgmres(  # performs k-cycle
+                #     {"eps": 0.25, "maxiter": 16, "restartlen": 8, "checkres": False}
+                # ),
+            },
+        )
+        slv = w.propagator(
+            i.fgmres(
+                {"eps": 1e-12, "maxiter": 1000, "restartlen": 20},
+                prec=i.mixed_precision(
+                    mg_prec,
                     g.single,
                     g.double,
                 ),
